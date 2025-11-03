@@ -372,132 +372,165 @@ class BSRValidator:
                 "rows_marked": int(duplicates_marked_count), 
             }
         }
-
     
     def _check_f1_obligations(self) -> Dict[str, Any]:
         """
-        CHECK 4: F1 Obligation Broadcaster Presence with Top 3 Fuzzy Matching.
-        Flags rows as 'Potential Match' if their broadcaster is not an exact match 
-        by showing the top 3 closest matches from the required list (above threshold).
+        CHECK 4: F1 Obligation Broadcaster Presence with MANUAL MAPPING.
+        Assumes: Obligation Sheet has CHANNEL NAMES, BSR Sheet has GROUP NAMES.
+        The mapping is BSR Group Name (Key) -> Obligation Channel Name (Value).
         """
         TARGET_GP = '15_Dutch GP'
         FLAG_COLUMN = 'Obligation_Broadcaster_Status'
-        FUZZY_CONFIDENCE_THRESHOLD = 90 # Lowered to 50 as you set it
-        MAX_FUZZY_MATCHES = 3 # <-- NEW: Limit to top 3 matches
         
-        # Initialize the flag column
+        # --- Source Mapping List (Obligation Target Channel : BSR Group Name) ---
+        # This list is used to generate the functional map by inverting it.
+        OBLIGATION_CHANNEL_TO_BSR_GROUP_LIST = {
+            'DigitAlb': 'Digit-Alb',
+            'Fox Sports 1': 'Mediapro', # CORRECTED: Obligation Target:Fox Sports 1, BSR:Mediapro
+            'Fast Sports': 'Fast Media',
+            'beIN': 'beIN Media Group',
+            'Fox Sport': 'Fox Broadcasting Company',
+            'ORF': 'ORF',
+            'Sky Sport': 'Sky',
+            'Idman TV': 'Idman TV',
+            'RTBF': 'RTBF',
+            'Telenet': 'Telenet',
+            'ESPN': 'ESPN',
+            'Bandsports': 'Grupo Bandeirantes de Comunicacao',
+            'TV Bandeirantes': 'Grupo Bandeirantes de Comunicaçao',
+            'Nova TV': 'Nova Broadcasting Group',
+            'TSN': 'CTV Specialty Television',
+            'CCTV5': 'CCTV',
+            'Great Sports': 'Shanghai Media Group',
+            'Guangdong TV': 'Guangdong TV',
+            'Tencent': 'Tencent',
+            'Cytavision': 'Cytavision',
+            'Nova Sport': 'CME Group',
+            'TV3': 'TV3',
+            'Go3': 'Go3',
+            'TV6': 'All Media Baltics',
+            'Setanta Sports': 'Setanta Eurasia',
+            'Viasat': 'Viasat',
+            'Canal+': 'Canal+ Group',
+            'ANT1': 'Antenna Group',
+            'Now Sports': 'Now Sports',
+            'M4': 'MTVA',
+            'Viaplay': 'Viaplay Group',
+            'Fancode': 'Fancode',
+            'Sport5': 'Sport5',
+            'DAZN': 'DAZN',
+            'Fuji TV': 'Fuji Media Holdings Inc.',
+            'RTL Lux': 'RTL',
+            'Fox Sports': 'Fox Broadcasting Company',
+            'V Sport': 'Viaplay Group',
+            'TVWAN': 'TVWAN',
+            'SuperSport': 'MultiChoice',
+            'beIN Sports': 'beIN Media Group',
+            'Arena Sport': 'Arena TV',
+            'Sportklub': 'United Media',
+            'RUSH Sports': 'RUSH Sports',
+            'Eleven Sports': 'Eleven Sports Network',
+            'Polsat': 'Polsat Group',
+            'Antena': 'Antena TV Group',
+            'Coupang': 'Coupang',
+            'Vsport': 'Viaplay Group',
+            'RSI': 'RSI',
+            'RTS': 'RTS',
+            'SRF': 'SRG SSR',
+            'ELTA': 'ELTA TV',
+            'Videoland Sports': 'Videoland Sports',
+            'K+': 'Vietnam Telecom Digital TV Co. Ltd',
+        }
+        
+        # --- GENERATE FUNCTIONAL BSR GROUP -> OBLIGATION CHANNEL MAP ---
+        # We invert the map, making the BSR Group Name (Value) the key and the Obligation Channel Name (Key) the value.
+        # We use the BSR Group Name (e.g., 'Mediapro') as the key.
+        MANUAL_BROADCASTER_MAP = {
+            v.lower(): k for k, v in OBLIGATION_CHANNEL_TO_BSR_GROUP_LIST.items()
+        }
+        
+        # 1. Initialize the flag column
         self.df[FLAG_COLUMN] = 'Not Obligation Target'
         
-        # 1. Get the Obligation data (assuming _load_full_obligation_data is updated)
+        # 2. Get the Obligation data
         full_obligation_df = self._load_full_obligation_data()
         
-        # Handle case where obligation data is missing/empty
+        # ... (Error handling remains the same) ...
         if full_obligation_df.empty or 'Broadcaster' not in full_obligation_df.columns:
             self.df[FLAG_COLUMN] = 'Skipped/N/A (Obligation data unavailable)'
             return {
-                "check_key": "check_f1_obligations", 
-                "status": "Skipped", 
+                "check_key": "check_f1_obligations", "status": "Skipped", 
                 "action": "Broadcaster Presence Check", 
                 "description": f"Skipped: No obligation data found or valid 'Broadcaster' column for {TARGET_GP}.", 
                 "details": {"events_checked": 0, "total_missing": 0}
             }
         
-        # --- 2. Get required broadcasters ---
-        required_broadcasters_series = full_obligation_df['Broadcaster'].astype(str).str.strip().str.lower()
+        # --- 3. Get required broadcasters (Official Obligation Channel Names) ---
+        required_broadcasters_series = full_obligation_df['Broadcaster'].astype(str).str.strip()
         required_broadcasters_set = {b for b in required_broadcasters_series.unique() if b and b.lower() != 'nan'}
         total_required = len(required_broadcasters_set)
-        required_list = list(required_broadcasters_set) # For easier iteration
         
         if total_required == 0:
+            # ... (Return block remains the same) ...
             return {
-                "check_key": "check_f1_obligations", 
-                "status": "Completed", 
+                "check_key": "check_f1_obligations", "status": "Completed", 
                 "action": "Broadcaster Presence Check", 
                 "description": f"No required broadcasters found in the obligation list for {TARGET_GP}.", 
                 "details": {"events_checked": 0, "total_missing": 0}
             }
 
-        # --- 3 & 4. Prepare BSR, Flag Empty Broadcasters ---
+        # --- 4. Prepare BSR, Flag Empty Broadcasters ---
         bsr_broadcasters_series = self.df.get('Broadcaster', pd.Series(dtype=str))
         empty_broadcaster_mask = bsr_broadcasters_series.isna() | (bsr_broadcasters_series.astype(str).str.strip() == '')
         self.df.loc[empty_broadcaster_mask, FLAG_COLUMN] = 'Broadcaster WAS EMPTY'
         
-        # Clean the non-empty BSR broadcasters for matching
-        bsr_broadcasters_cleaned = bsr_broadcasters_series[~empty_broadcaster_mask].astype(str).str.strip().str.lower()
-        
-        # --- 5. Flag EXACT Present Broadcasters ---
-        is_required_mask = bsr_broadcasters_cleaned.isin(required_broadcasters_set)
-        loc_required = bsr_broadcasters_cleaned[is_required_mask].index
-        self.df.loc[loc_required, FLAG_COLUMN] = bsr_broadcasters_cleaned.loc[loc_required]
+        # BSR contains GROUP NAMES (e.g., Mediapro)
+        bsr_broadcasters_cleaned = bsr_broadcasters_series[~empty_broadcaster_mask].astype(str).str.strip()
+        bsr_broadcasters_lower = bsr_broadcasters_cleaned.str.lower()
 
-        # --- 6. Fuzzy Match Non-Obligation Targets (TOP 3 MATCHES) ---
+        # --- 5. Map BSR Group names to Obligation Channel names and Flag Present Broadcasters ---
         
-        non_target_mask = (~is_required_mask) & (~empty_broadcaster_mask)
-        non_target_unique_names = bsr_broadcasters_cleaned[non_target_mask].unique().tolist() 
+        # 5a. Apply the manual mapping (BSR Group (lower) -> Obligation Channel Name)
+        # E.g., 'mediapro' -> 'Fox Sports 1'
+        mapped_broadcasters = bsr_broadcasters_lower.map(MANUAL_BROADCASTER_MAP).fillna(bsr_broadcasters_cleaned)
         
-        # Dictionary to store confirmed fuzzy matches: {non_target_name: 'Flag Value String'}
-        fuzzy_match_map = {} 
+        # 5b. Check if the mapped name (Obligation Channel) is in the required set (Obligation Channel names)
+        # This correctly checks if the BSR Group covers a required Obligation Channel.
+        is_required_mask = mapped_broadcasters.isin(required_broadcasters_set)
+        loc_required = mapped_broadcasters[is_required_mask].index
         
-        for non_target_name in non_target_unique_names:
-            # List to hold all potential matches above the threshold: [(ratio, required_name), ...]
-            potential_matches = []
-            
-            # Skip if the unique name is already processed (safety check)
-            if self.df.loc[self.df['Broadcaster'].astype(str).str.strip().str.lower() == non_target_name, FLAG_COLUMN].iloc[0] != 'Not Obligation Target':
-                continue
+        # Flag the BSR rows with the official, matching Obligation Channel name (e.g., 'Fox Sports 1')
+        self.df.loc[loc_required, FLAG_COLUMN] = mapped_broadcasters.loc[loc_required]
 
-            # Calculate partial ratio against every required broadcaster
-            for required_name in required_list:
-                ratio = fuzz.partial_ratio(non_target_name, required_name)
-                if ratio >= FUZZY_CONFIDENCE_THRESHOLD:
-                    potential_matches.append((ratio, required_name))
-            
-            if potential_matches:
-                # Sort the list by ratio (descending) and take the top N matches
-                potential_matches.sort(key=lambda x: x[0], reverse=True)
-                top_matches = potential_matches[:MAX_FUZZY_MATCHES]
-                
-                # Format the output string for the flag
-                match_strings = [f"{name} (Conf: {ratio})" for ratio, name in top_matches]
-                flag_value = "Potential Match: " + " | ".join(match_strings)
-                
-                fuzzy_match_map[non_target_name] = flag_value
-                
-        # Apply the fuzzy match flags back to the main DataFrame
-        for non_target_name, flag_value in fuzzy_match_map.items():
-            # Only target rows that still hold the default 'Not Obligation Target' flag
-            rows_to_update_mask = (bsr_broadcasters_cleaned == non_target_name) & (self.df[FLAG_COLUMN] == 'Not Obligation Target')
-            self.df.loc[rows_to_update_mask, FLAG_COLUMN] = flag_value
-
-        # --- 7. Final Verification and Report (for the summary) ---
+        # --- 6. Final Verification and Report ---
         
-        # Get the set of actual required broadcasters found by EXACT match
+        # The list of present broadcasters now contains Obligation Channel Names (e.g., 'Fox Sports 1')
         present_broadcasters_set = set(self.df.loc[loc_required, FLAG_COLUMN].unique())
+        # The missing set compares the required Obligation Channels against the found Obligation Channels
         missing_broadcasters_set = required_broadcasters_set.difference(present_broadcasters_set)
         missing_broadcasters = sorted(list(missing_broadcasters_set))
         
         total_missing = len(missing_broadcasters)
-        total_fuzzy_matches = self.df[self.df[FLAG_COLUMN].str.startswith('Potential Match')].shape[0]
+        total_rows_matched = self.df[self.df[FLAG_COLUMN].isin(required_broadcasters_set)].shape[0]
 
         status = "Completed"
-        description = f"Flagged BSR rows. {total_fuzzy_matches} rows marked as Potential Match."
+        description = f"Flagged BSR rows. {total_rows_matched} rows successfully mapped/matched to an obligation target."
         
         if total_missing > 0:
             status = "Flagged"
-            description = f"Flagged BSR rows. ALERT: {total_missing} obligated broadcasters missing entirely. {total_fuzzy_matches} rows fuzzy matched."
+            description = f"Flagged BSR rows. ALERT: {total_missing} obligated **Channels** missing entirely. {total_rows_matched} rows mapped/matched."
             
         return {
             "check_key": "check_f1_obligations", 
             "status": status, 
-            "action": "Broadcaster Presence Flagging (Top 3 Fuzzy)", 
+            "action": "Broadcaster Presence Flagging (Manual Map: Group->Channel)", 
             "description": description, 
             "details": {
                 "target_gp": TARGET_GP,
-                "confidence_threshold": FUZZY_CONFIDENCE_THRESHOLD,
-                "rows_fuzzy_matched": int(total_fuzzy_matches),
-                "required_broadcasters": int(total_required),
-                "broadcasters_present": int(total_required - total_missing),
-                "broadcasters_missing": int(total_missing),
+                "rows_successfully_matched": int(total_rows_matched),
+                "required_channels": int(total_required),
+                "channels_present": int(total_required - total_missing),
+                "channels_missing": int(total_missing),
                 "list_missing": missing_broadcasters
             }
         }

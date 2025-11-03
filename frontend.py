@@ -13,11 +13,11 @@ st.set_page_config(page_title="Data Processing App", layout="wide")
 st.title("📊 Data Processing and QC Automation")
 
 st.markdown("""
-This application interfaces with a FastAPI backend to handle both heavy-duty BSR QC processing and sales data management.
+This application interfaces with a FastAPI backend to handle both heavy-duty BSR QC processing and Laliga QC.
 """)
 
 # --- Use Tabs for Clear Separation ---
-qc_tab, sales_tab, market_checks_tab = st.tabs(["✅ QC Automation (BSR)", "📈 Sales Data Management", "🌍 Market Specific Checks"])
+qc_tab, sales_tab, market_checks_tab = st.tabs(["✅ Main QC Automation (BSR)", " Laliga ", " F1 Market Specific Checks"])
 
 # --- Define all market check keys globally for management ---
 all_market_check_keys = {
@@ -129,17 +129,17 @@ with qc_tab:
                     st.error(f"❌ Connection or Timeout Error: Could not reach the backend. Check if FastAPI is running. Error: {e}")
 
 # -----------------------------------------------------------
-#         📈 SALES DATA MANAGEMENT TAB (UNCHANGED)
+#         📈 LaligaDATA MANAGEMENT TAB (UNCHANGED)
 # -----------------------------------------------------------
 
 with sales_tab:
-    st.header("Sales Data Management")
+    st.header("LaligaData Management")
     st.markdown("Upload a new `Sales.csv` file to the backend for analysis.")
     
-    st.subheader("1. Upload New Sales Data")
-    sales_file = st.file_uploader("📄 Upload Sales File (.csv)", type=["csv"], key="sales_csv")
+    st.subheader("1. Upload New LaligaData")
+    sales_file = st.file_uploader("📄 Upload LaligaFile (.csv)", type=["csv"], key="sales_csv")
     
-    if st.button("⬆️ Upload Sales CSV to Backend"):
+    if st.button("⬆️ Upload LaligaCSV to Backend"):
         if sales_file:
             with st.spinner(f"Uploading {sales_file.name}..."):
                 

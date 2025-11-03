@@ -88,7 +88,7 @@ start_background_cleanup()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # This is your existing lifespan logic, ensuring the Sales data is loaded
+    # This is your existing lifespan logic, ensuring the Laligadata is loaded
     try:
         # app.state.df = pd.read_csv(DATA_PATH / "Sales.csv" , index_col=0 , parse_dates= True)
         app.state.df = pd.DataFrame() # Placeholder if Sales.csv isn't available
