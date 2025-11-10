@@ -120,6 +120,8 @@ class BSRValidator:
         # normalized = normalized.str.replace(r'\s+SPORT[S]*', '', regex=True)
         # normalized = normalized.str.replace(r'\s+TV', '', regex=True)
         # normalized = normalized.str.replace(r'\s{2,}', ' ', regex=True).str.strip()
+        # normalized = normalized.str.replace(r'\s+', '', regex=True).str.strip()
+        # normalized = normalized.str.replace(r'[\s\+]+', '', regex=True).str.strip()
         return normalized
 
 # --- NEW HELPER METHOD: Load and Filter Macro Rules ---

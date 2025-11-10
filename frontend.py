@@ -6,7 +6,9 @@ import os
 
 # --- FastAPI Configuration ---
 # Update this if your FastAPI server is running on a different port or host
-BACKEND_URL = "http://localhost:8000/api" 
+Render_BACKEND_URL = "https://qc-s0au.onrender.com/api"
+BACKEND_BASE_URL = os.environ.get("Render_BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = BACKEND_BASE_URL + "/api"
 
 # -------------------- 🌐 Streamlit UI --------------------
 st.set_page_config(page_title="Data Processing App", layout="wide")
