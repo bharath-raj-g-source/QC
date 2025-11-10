@@ -7,40 +7,38 @@
     "codespaces": {
       "openFiles": [
         "README.md",
-        "main.py" // Change this to your FastAPI entry file (e.g., app.py)
+        "frontend.py" // Changed to open your frontend file
       ]
     },
     "vscode": {
       "settings": {},
       "extensions": [
-        "ms-python.python",      // Official Python extension
-        "ms-python.vscode-pylance", // Pylance for performance and type checking
-        "ms-toolsai.jupyter"     // Useful if you include notebooks in your project
+        "ms-python.python",      
+        "ms-python.vscode-pylance", 
+        "ms-toolsai.jupyter"     
       ]
     }
   },
 
-  // Command to run after the source code is cloned.
-  // Installs system packages (if packages.txt exists), installs Python dependencies,
-  // and specifically installs FastAPI and Uvicorn.
+  // Ensures FastAPI and Uvicorn are installed
   "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user fastapi uvicorn",
   
-  // Command to run after the editor is attached. This starts the FastAPI server.
-  // Assumes your FastAPI application object is named 'app' in 'main.py'.
-  // --host 0.0.0.0 is crucial for accessibility inside the container/codespace.
+  // *** KEY CHANGE: POST ATTACH COMMAND ***
+  // This command starts the FastAPI server looking for the 'app' variable in 'api.py'.
+  // NOTE: You typed '--hos' in your prompt, I've corrected it to '--host'.
   "postAttachCommand": {
-    "server": "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    "server": "uvicorn api:app --host 0.0.0.0 --port 8000 --reload"
   },
   
   // Attributes for port 8000 (FastAPI default)
   "portsAttributes": {
     "8000": {
       "label": "FastAPI Application",
-      "onAutoForward": "openBrowser" // Automatically opens a browser tab
+      "onAutoForward": "openBrowser" 
     }
   },
   
-  // Ensures port 8000 is forwarded (accessible from your local machine/browser)
+  // Ensures port 8000 is forwarded
   "forwardPorts": [
     8000
   ]
