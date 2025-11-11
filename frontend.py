@@ -370,7 +370,11 @@ with market_checks_tab:
                             message = result_json.get("message", "Processing complete.")
                             
                             # Construct the full download URL using the base URL
-                            full_download_url = f"http://localhost:8000{download_url_suffix}"
+                            # full_download_url = f"http://localhost:8000{download_url_suffix}"
+                            full_download_url = f"https://qc-s0au.onrender.com{download_url_suffix}"
+
+                            
+                            # full_download_url = `${REMOTE_BACKEND_URL}${download_url_suffix}`;
 
                             st.success(f"✅ Checks completed successfully! {message}")
                             
