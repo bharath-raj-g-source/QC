@@ -9,6 +9,7 @@ import shutil # Used for efficient file saving
 from typing import Optional, List # Added List for checks
 from C_data_processing import DataExplorer
 from io import BytesIO # Needed to save Excel in memory before returning
+from starlette.background import BackgroundTask
 
 # --- Data/Project Specific Imports ---
 # import pathlib
@@ -128,21 +129,21 @@ async def upload_csv(file: UploadFile = File(...)):
 @app.get("/api/summary")
 async def read_summary_data():
     if app.state.df.empty:
-        raise HTTPException(status_code=404, detail="Data not loaded. Upload Sales.csv first.")
+        raise HTTPException(status_code=404, detail="Data not loaded. Upload laliga.csv first.")
     data = DataExplorer(app.state.df)
     return data.summary().json_response()
 
 @app.get("/api/kpis")
 async def read_kpis(country: str = Query(None)):
     if app.state.df.empty:
-        raise HTTPException(status_code=404, detail="Data not loaded. Upload Sales.csv first.")
+        raise HTTPException(status_code=404, detail="Data not loaded. Upload laliga.csv first.")
     data = DataExplorer(app.state.df)
     return data.kpis(country)
 
 @app.get("/api/")
 async def read_sales(limit: int = Query(100, gt=0, lt=150000)):
     if app.state.df.empty:
-        raise HTTPException(status_code=404, detail="Data not loaded. Upload Sales.csv first.")
+        raise HTTPException(status_code=404, detail="Data not loaded. Upload laliga.csv first.")
     data = DataExplorer(app.state.df, limit)
     return data.json_response()
 
@@ -344,13 +345,35 @@ async def market_check_and_process(
 async def download_file(filename: str = Query(...)):
     """Retrieves a previously generated file from the output folder."""
     file_path = os.path.join(OUTPUT_FOLDER, filename)
-    
+
+    # Define a function to be run *after* the file is successfully streamed to the client
+    def remove_file():
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"🧹 Cleaned up file: {filename}")
+        except Exception as e:
+            print(f"⚠️ Error during cleanup of {filename}: {e}")
+
     if not os.path.exists(file_path):
-        # This will be triggered if the cleanup thread deleted the file, or if the filename is bad
+        # 💡 DEBUG PRINT: Confirms the location the server is checking
+        print(f"DEBUG: File NOT FOUND at expected path: {file_path}")
         raise HTTPException(status_code=404, detail="File not found or link has expired.")
         
     return FileResponse(
         path=file_path,
         filename=filename,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        # Use BackgroundTask to ensure cleanup ONLY happens after the file stream completes
+        background=BackgroundTask(remove_file) 
     )
+    
+    # if not os.path.exists(file_path):
+    #     # This will be triggered if the cleanup thread deleted the file, or if the filename is bad
+    #     raise HTTPException(status_code=404, detail="File not found or link has expired.")
+        
+    # return FileResponse(
+    #     path=file_path,
+    #     filename=filename,
+    #     media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    # )
