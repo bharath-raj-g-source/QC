@@ -26,12 +26,10 @@ all_market_check_keys = {
     # 1. Channel and Territory Review
     "check_latam_espn": "LATAM ESPN Channels: Ecuador and Venezuela missing",
     "check_italy_mexico": "Italy and Mexico: Duplications/consolidations",
-    "check_channel4plus1": "Specific Channel Checks: Channel 4+1",
-    "check_espn4_bsa": "ESPN 4: Latam channel extract from BSA",
     "check_f1_obligations": "Formula 1 Obligations: Missing channels", # <--- F1 Check
     "apply_duplication_weights": "Apply Market Duplication and Upweight Rules (Germany, SA, UK, Brazil, etc.)",
     "check_session_completeness": "Session Count Check: Flag duplicate/over-reported Qualifying, Race, or Training sessions",
-    "impute_program_type": "Impute Program Type: Assign Live/Repeat/Highlights/Support based on time matching",
+    # "impute_program_type": "Impute Program Type: Assign Live/Repeat/Highlights/Support based on time matching",
     "duration_limits": "Duration Limits Check: Flag broadcasts outside 5 minutes to 5 hours (QC)",
     "live_date_integrity": "Live Session Date Integrity: Check Live Race/Quali/Train against fixed schedule date",
     "update_audience_from_overnight": "Audience Upscale Check: Update BSR with higher Max Overnight data", 
@@ -39,16 +37,16 @@ all_market_check_keys = {
     "dup_channel_existence": "Duplication Channel Existence: Check if all target channels are in BSR",
 
     # 2. Broadcaster/Platform Coverage
-    "check_youtube_global": "YOUTUBE: ADD YOUTUBE AS PAN-GLOBAL (CPT 8.14)",
-    "check_pan_mena": "Pan MENA: BROADCASTER",
-    "check_china_tencent": "China Tencent: BROADCASTER",
-    "check_czech_slovakia": "Czech Rep and Slovakia: BROADCASTER",
-    "check_ant1_greece": "ANT1+ Greece: BROADCASTER (CPT 3.23)",
-    "check_india": "India: BROADCASTER",
-    "check_usa_espn": "USA ESPN Mail: BROADCASTER",
-    "check_dazn_japan": "DAZN Japan: BROADCASTER",
-    "check_aztv": "AZTV / IDMAN TV: BROADCASTER",
-    "check_rush_caribbean": "RUSH Caribbean: BROADCASTER",
+    # "check_youtube_global": "YOUTUBE: ADD YOUTUBE AS PAN-GLOBAL (CPT 8.14)",
+    # "check_pan_mena": "Pan MENA: BROADCASTER",
+    # "check_china_tencent": "China Tencent: BROADCASTER",
+    # "check_czech_slovakia": "Czech Rep and Slovakia: BROADCASTER",
+    # "check_ant1_greece": "ANT1+ Greece: BROADCASTER (CPT 3.23)",
+    # "check_india": "India: BROADCASTER",
+    # "check_usa_espn": "USA ESPN Mail: BROADCASTER",
+    # "check_dazn_japan": "DAZN Japan: BROADCASTER",
+    # "check_aztv": "AZTV / IDMAN TV: BROADCASTER",
+    # "check_rush_caribbean": "RUSH Caribbean: BROADCASTER",
     
     # 3. Removals and Recreations
     "remove_andorra": "Remove Andorra",
@@ -57,8 +55,8 @@ all_market_check_keys = {
     "remove_brazil_espn_fox": "Remove any ESPN/Fox from Brazil",
     "remove_switz_canal": "Remove Switzerland Canal+ / ServusTV",
     "remove_viaplay_baltics": "Remove viaplay from Latvia, Lithuania, Poland, and Estonia",
-    "recreate_viaplay": "Viaplay: Recreate based on a full market of lives",
-    "recreate_disney_latam": "Disney+ Latam: Recreate based on a full market of lives",
+    # "recreate_viaplay": "Viaplay: Recreate based on a full market of lives",
+    # "recreate_disney_latam": "Disney+ Latam: Recreate based on a full market of lives",
 }
 
 
@@ -266,17 +264,17 @@ with market_checks_tab:
 
     # --- Checkbox UI generation (unchanged) ---
     with st.expander("1. Channel and Territory Review", expanded=True):
-        st.subheader("General Market Checks")
-        st.checkbox(all_market_check_keys["check_latam_espn"], key="check_latam_espn")
-        st.checkbox(all_market_check_keys["check_italy_mexico"], key="check_italy_mexico")
+        # st.subheader("General Market Checks")
+        # st.checkbox(all_market_check_keys["check_latam_espn"], key="check_latam_espn")
+        # st.checkbox(all_market_check_keys["check_italy_mexico"], key="check_italy_mexico")
         
-        st.subheader("Specific Channel Checks (against uploaded file)")
-        st.checkbox(all_market_check_keys["check_channel4plus1"], key="check_channel4plus1")
-        st.checkbox(all_market_check_keys["check_espn4_bsa"], key="check_espn4_bsa")
+        # st.subheader("Specific Channel Checks (against uploaded file)")
+        # st.checkbox(all_market_check_keys["check_channel4plus1"], key="check_channel4plus1")
+        # st.checkbox(all_market_check_keys["check_espn4_bsa"], key="check_espn4_bsa")
         st.checkbox(all_market_check_keys["check_f1_obligations"], key="check_f1_obligations") # <--- F1 Check
         st.checkbox(all_market_check_keys["apply_duplication_weights"], key="apply_duplication_weights") # <--- F1 Check
         st.checkbox(all_market_check_keys["check_session_completeness"], key="check_session_completeness")
-        st.checkbox(all_market_check_keys["impute_program_type"], key="impute_program_type")
+        # st.checkbox(all_market_check_keys["impute_program_type"], key="impute_program_type")
         st.checkbox(all_market_check_keys["duration_limits"], key="duration_limits")
         st.checkbox(all_market_check_keys["live_date_integrity"], key="live_date_integrity")
         st.checkbox(all_market_check_keys["update_audience_from_overnight"], key="update_audience_from_overnight") # <-- NEW
@@ -284,20 +282,20 @@ with market_checks_tab:
         st.checkbox(all_market_check_keys["dup_channel_existence"], key="dup_channel_existence") # <-- NEW CHECKBOX
 
     # ... (rest of the checkboxes remain here) ...
-    with st.expander("2. Broadcaster/Platform Coverage (BROADCASTER/GLOBAL)"):
-        st.subheader("Global/Platform Adds")
-        st.checkbox(all_market_check_keys["check_youtube_global"], key="check_youtube_global")
+    # with st.expander("2. Broadcaster/Platform Coverage (BROADCASTER/GLOBAL)"):
+    #     st.subheader("Global/Platform Adds")
+    #     st.checkbox(all_market_check_keys["check_youtube_global"], key="check_youtube_global")
         
-        st.subheader("Individual Broadcaster Confirmations")
-        st.checkbox(all_market_check_keys["check_pan_mena"], key="check_pan_mena")
-        st.checkbox(all_market_check_keys["check_china_tencent"], key="check_china_tencent")
-        st.checkbox(all_market_check_keys["check_czech_slovakia"], key="check_czech_slovakia")
-        st.checkbox(all_market_check_keys["check_ant1_greece"], key="check_ant1_greece")
-        st.checkbox(all_market_check_keys["check_india"], key="check_india")
-        st.checkbox(all_market_check_keys["check_usa_espn"], key="check_usa_espn")
-        st.checkbox(all_market_check_keys["check_dazn_japan"], key="check_dazn_japan")
-        st.checkbox(all_market_check_keys["check_aztv"], key="check_aztv")
-        st.checkbox(all_market_check_keys["check_rush_caribbean"], key="check_rush_caribbean")
+    #     st.subheader("Individual Broadcaster Confirmations")
+    #     st.checkbox(all_market_check_keys["check_pan_mena"], key="check_pan_mena")
+    #     st.checkbox(all_market_check_keys["check_china_tencent"], key="check_china_tencent")
+    #     st.checkbox(all_market_check_keys["check_czech_slovakia"], key="check_czech_slovakia")
+    #     st.checkbox(all_market_check_keys["check_ant1_greece"], key="check_ant1_greece")
+    #     st.checkbox(all_market_check_keys["check_india"], key="check_india")
+    #     st.checkbox(all_market_check_keys["check_usa_espn"], key="check_usa_espn")
+    #     st.checkbox(all_market_check_keys["check_dazn_japan"], key="check_dazn_japan")
+    #     st.checkbox(all_market_check_keys["check_aztv"], key="check_aztv")
+    #     st.checkbox(all_market_check_keys["check_rush_caribbean"], key="check_rush_caribbean")
 
 
     with st.expander("3. Removals and Recreations"):
@@ -309,9 +307,9 @@ with market_checks_tab:
         st.checkbox(all_market_check_keys["remove_switz_canal"], key="remove_switz_canal")
         st.checkbox(all_market_check_keys["remove_viaplay_baltics"], key="remove_viaplay_baltics")
 
-        st.subheader("Recreations (Check for full market coverage)")
-        st.checkbox(all_market_check_keys["recreate_viaplay"], key="recreate_viaplay")
-        st.checkbox(all_market_check_keys["recreate_disney_latam"], key="recreate_disney_latam")
+        # st.subheader("Recreations (Check for full market coverage)")
+        # st.checkbox(all_market_check_keys["recreate_viaplay"], key="recreate_viaplay")
+        # st.checkbox(all_market_check_keys["recreate_disney_latam"], key="recreate_disney_latam")
         
     st.write("---")
 
