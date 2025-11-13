@@ -26,15 +26,15 @@ all_market_check_keys = {
     # 1. Channel and Territory Review
     "check_latam_espn": "LATAM ESPN Channels: Ecuador and Venezuela missing",
     "check_italy_mexico": "Italy and Mexico: Duplications/consolidations",
-    "check_f1_obligations": "Formula 1 Obligations: Missing channels", # <--- F1 Check
+    "check_f1_obligations": "Formula 1 Obligations: Missing channels (Required Obligations sheet)" , # <--- F1 Check
     "apply_duplication_weights": "Apply Market Duplication and Upweight Rules (Germany, SA, UK, Brazil, etc.)",
     "check_session_completeness": "Session Count Check: Flag duplicate/over-reported Qualifying, Race, or Training sessions",
     # "impute_program_type": "Impute Program Type: Assign Live/Repeat/Highlights/Support based on time matching",
     "duration_limits": "Duration Limits Check: Flag broadcasts outside 5 minutes to 5 hours (QC)",
     "live_date_integrity": "Live Session Date Integrity: Check Live Race/Quali/Train against fixed schedule date",
-    "update_audience_from_overnight": "Audience Upscale Check: Update BSR with higher Max Overnight data", 
+    "update_audience_from_overnight": "Audience Upscale Check: Update BSR with higher Max Overnight data (Required Overnight sheet)" , 
     # NEW CHECK
-    "dup_channel_existence": "Duplication Channel Existence: Check if all target channels are in BSR",
+    "dup_channel_existence": "Duplication Channel Existence: Check if all target channels are in BSR (Required Macro File)",
 
     # 2. Broadcaster/Platform Coverage
     # "check_youtube_global": "YOUTUBE: ADD YOUTUBE AS PAN-GLOBAL (CPT 8.14)",
